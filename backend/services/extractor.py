@@ -73,15 +73,88 @@ class IVideoExtractor:
     def process_youtube(youtube_url: str, output_dir: Path) -> Dict[str, Any]:
         """
         Extracts audio and available subtitles/captions from a YouTube URL.
-        Returns metadata dictionary containing local audio file path, title, duration, and captions if found.
+        Uses pytubefix as primary (bypasses bot detection), yt-dlp as fallback.
         """
         if not is_valid_youtube_url(youtube_url):
             raise ValueError("Invalid YouTube URL format.")
 
         video_id = extract_youtube_id(youtube_url) or str(uuid.uuid4())[:8]
+
+        # --- Primary: pytubefix ---
+        try:
+            return IVideoExtractor._extract_with_pytubefix(youtube_url, video_id, output_dir)
+        except Exception as e:
+            logger.warning(f"pytubefix extraction failed: {e}. Falling back to yt-dlp.")
+
+        # --- Fallback: yt-dlp ---
+        return IVideoExtractor._extract_with_ytdlp(youtube_url, video_id, output_dir)
+
+    @staticmethod
+    def _extract_with_pytubefix(youtube_url: str, video_id: str, output_dir: Path) -> Dict[str, Any]:
+        """Download audio using pytubefix — handles modern YouTube without n-challenge issues."""
+        from pytubefix import YouTube
+        from pytubefix.cli import on_progress
+
+        yt = YouTube(youtube_url, on_progress_callback=on_progress, use_oauth=False, allow_oauth_cache=False)
+
+        title = yt.title or f"YouTube Lecture ({video_id})"
+        duration = yt.length or 0
+
+        # Get best audio stream
+        audio_stream = yt.streams.filter(only_audio=True).order_by('abr').last()
+        if not audio_stream:
+            raise ValueError("No audio stream found via pytubefix.")
+
+        # Download audio
+        out_filename = f"yt_{video_id}.{audio_stream.subtype}"
+        audio_file = audio_stream.download(output_path=str(output_dir), filename=out_filename)
+        logger.info(f"pytubefix downloaded audio: {audio_file}")
+
+        # Try to get captions
+        captions_text = ""
+        captions_segments = []
+        try:
+            caption = yt.captions.get('en') or yt.captions.get('a.en')
+            if caption:
+                srt_text = caption.generate_srt_captions()
+                # Parse SRT into segments
+                import re as _re
+                blocks = srt_text.strip().split('\n\n')
+                time_re = _re.compile(r'(\d+:\d+:\d+,\d+)\s-->\s(\d+:\d+:\d+,\d+)')
+                for block in blocks:
+                    lines = block.strip().split('\n')
+                    if len(lines) >= 2:
+                        m = time_re.search(lines[1] if lines[0].isdigit() else lines[0])
+                        if m:
+                            def srt_to_sec(ts):
+                                h, mn, rest = ts.replace(',', '.').split(':')
+                                return float(h)*3600 + float(mn)*60 + float(rest)
+                            start = srt_to_sec(m.group(1))
+                            end = srt_to_sec(m.group(2))
+                            text = ' '.join(lines[2:] if lines[0].isdigit() else lines[1:]).strip()
+                            if text:
+                                captions_segments.append({"start_time": round(start, 2), "end_time": round(end, 2), "text": text})
+                captions_text = " ".join([s["text"] for s in captions_segments])
+                logger.info(f"pytubefix extracted {len(captions_segments)} caption segments.")
+        except Exception as ce:
+            logger.warning(f"Caption extraction failed: {ce}")
+
+        return {
+            "title": title,
+            "duration": duration,
+            "audio_path": audio_file,
+            "has_captions": bool(captions_segments),
+            "captions_text": captions_text,
+            "captions_segments": captions_segments,
+            "source_type": "youtube",
+            "youtube_id": video_id
+        }
+
+    @staticmethod
+    def _extract_with_ytdlp(youtube_url: str, video_id: str, output_dir: Path) -> Dict[str, Any]:
+        """Fallback: download audio using yt-dlp."""
         out_template = str(output_dir / f"yt_{video_id}_%(id)s.%(ext)s")
 
-        # Get ffmpeg binary path from imageio_ffmpeg if installed
         ffmpeg_exe = None
         try:
             import imageio_ffmpeg
@@ -91,7 +164,6 @@ class IVideoExtractor:
         except Exception as e:
             logger.warning(f"Could not load imageio_ffmpeg: {e}")
 
-        # Check for cookies file (optional, for authenticated requests)
         cookies_path = Path(__file__).resolve().parent.parent / "youtube_cookies.txt"
 
         ydl_opts = {
@@ -103,47 +175,30 @@ class IVideoExtractor:
             'skip_download': False,
             'quiet': True,
             'no_warnings': True,
-            # Android client bypasses n-challenge JS requirement on headless servers
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'web'],
-                    'player_skip': ['webpage', 'config'],
-                }
-            },
         }
-
-        # Use cookies file if it exists
         if cookies_path.exists():
             ydl_opts['cookiefile'] = str(cookies_path)
-            logger.info("Using YouTube cookies file for authentication.")
-
         if ffmpeg_exe and os.path.exists(ffmpeg_exe):
             ydl_opts['ffmpeg_location'] = ffmpeg_exe
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(youtube_url, download=True)
-
-
             title = info.get('title', f"YouTube Lecture ({video_id})")
             duration = info.get('duration', 0.0)
 
-            # Find generated audio file and VTT subtitle file
             audio_file = None
             for file in output_dir.glob(f"yt_{video_id}_*.*"):
                 if file.suffix in ['.mp3', '.m4a', '.wav', '.webm', '.ogg']:
                     audio_file = str(file)
                     break
 
-            # Check for downloaded VTT subtitles
             captions_text = ""
             captions_segments = []
-
             for vtt_file in output_dir.glob(f"yt_{video_id}_*.vtt"):
                 parsed_segs = parse_vtt_file(vtt_file)
                 if parsed_segs:
                     captions_segments = parsed_segs
                     captions_text = " ".join([s["text"] for s in parsed_segs])
-                    logger.info(f"Successfully extracted {len(parsed_segs)} timestamped caption segments from {vtt_file.name}")
                     break
 
             return {
