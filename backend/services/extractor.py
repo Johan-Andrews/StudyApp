@@ -91,6 +91,9 @@ class IVideoExtractor:
         except Exception as e:
             logger.warning(f"Could not load imageio_ffmpeg: {e}")
 
+        # Check for cookies file (optional, for authenticated requests)
+        cookies_path = Path(__file__).resolve().parent.parent / "youtube_cookies.txt"
+
         ydl_opts = {
             'format': 'bestaudio[ext=m4a]/bestaudio/best',
             'outtmpl': out_template,
@@ -100,7 +103,21 @@ class IVideoExtractor:
             'skip_download': False,
             'quiet': True,
             'no_warnings': True,
+            # Use iOS client to bypass bot detection on server/cloud IPs
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['ios', 'web_creator', 'web'],
+                }
+            },
+            'http_headers': {
+                'User-Agent': 'com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)',
+            },
         }
+
+        # Use cookies file if it exists (upload youtube_cookies.txt to backend folder)
+        if cookies_path.exists():
+            ydl_opts['cookiefile'] = str(cookies_path)
+            logger.info("Using YouTube cookies file for authentication.")
 
         if ffmpeg_exe and os.path.exists(ffmpeg_exe):
             ydl_opts['ffmpeg_location'] = ffmpeg_exe

@@ -31,8 +31,8 @@ fi
 # --- 3. Install System Dependencies ---
 echo "[3/7] Installing Python, ffmpeg, git, nginx..."
 sudo apt-get install -y \
-    python3.11 \
-    python3.11-venv \
+    python3 \
+    python3-venv \
     python3-pip \
     ffmpeg \
     git \
@@ -55,7 +55,7 @@ fi
 echo "[5/7] Installing Python dependencies..."
 cd /home/ubuntu/StudyApp/backend
 
-python3.11 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
