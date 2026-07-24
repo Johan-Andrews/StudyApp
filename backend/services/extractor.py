@@ -95,7 +95,7 @@ class IVideoExtractor:
         cookies_path = Path(__file__).resolve().parent.parent / "youtube_cookies.txt"
 
         ydl_opts = {
-            'format': 'bestaudio[ext=m4a]/bestaudio/best',
+            'format': 'bestaudio/best',
             'outtmpl': out_template,
             'writesubtitles': True,
             'writeautomaticsub': True,
@@ -103,15 +103,6 @@ class IVideoExtractor:
             'skip_download': False,
             'quiet': True,
             'no_warnings': True,
-            # Use iOS client to bypass bot detection on server/cloud IPs
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['ios', 'web_creator', 'web'],
-                }
-            },
-            'http_headers': {
-                'User-Agent': 'com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)',
-            },
         }
 
         # Use cookies file if it exists (upload youtube_cookies.txt to backend folder)
