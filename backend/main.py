@@ -30,6 +30,10 @@ app = FastAPI(
     description="FastAPI Backend for Clipnote AI Lecture Note Taker"
 )
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "clipnote-backend", "version": settings.VERSION}
+
 # Enable CORS for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
