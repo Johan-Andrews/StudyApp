@@ -40,10 +40,17 @@ export const MediaSyncPlayer = forwardRef<MediaSyncPlayerRef, MediaSyncPlayerPro
       return (match && match[2].length === 11) ? match[2] : null;
     };
 
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const getApiBaseUrl = () => {
+      if (typeof window !== 'undefined') {
+        if (window.location.protocol === 'https:' || !process.env.NEXT_PUBLIC_API_URL) {
+          return '';
+        }
+      }
+      return process.env.NEXT_PUBLIC_API_URL || '';
+    };
     const isYoutube = sourceType === 'youtube' || mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be');
     const youtubeId = isYoutube ? extractYoutubeId(mediaUrl) : null;
-    const fullMediaUrl = mediaUrl.startsWith('http') ? mediaUrl : `${apiBaseUrl}${mediaUrl}`;
+    const fullMediaUrl = mediaUrl.startsWith('http') ? mediaUrl : `${getApiBaseUrl()}${mediaUrl}`;
 
     return (
       <div className="warm-card overflow-hidden">

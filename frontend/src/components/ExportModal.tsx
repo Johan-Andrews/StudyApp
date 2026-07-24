@@ -17,8 +17,15 @@ export const ExportModal: React.FC<ExportModalProps> = ({ jobId, isOpen, onClose
 
   const handleExport = (format: 'pdf' | 'md' | 'anki') => {
     setDownloadingFormat(format);
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    const exportUrl = `${apiBaseUrl}/api/lectures/${jobId}/export?format=${format}&with_answers=${withAnswers}`;
+    const getApiBaseUrl = () => {
+      if (typeof window !== 'undefined') {
+        if (window.location.protocol === 'https:' || !process.env.NEXT_PUBLIC_API_URL) {
+          return '';
+        }
+      }
+      return process.env.NEXT_PUBLIC_API_URL || '';
+    };
+    const exportUrl = `${getApiBaseUrl()}/api/lectures/${jobId}/export?format=${format}&with_answers=${withAnswers}`;
     
     const link = document.createElement('a');
     link.href = exportUrl;

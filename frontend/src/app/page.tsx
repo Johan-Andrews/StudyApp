@@ -61,7 +61,14 @@ interface LectureResults {
   };
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    if (window.location.protocol === 'https:' || !process.env.NEXT_PUBLIC_API_URL) {
+      return '';
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL || '';
+};
 
 export default function Home() {
   // Submission Form State
@@ -100,7 +107,7 @@ export default function Home() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/lectures/${activeJobId}/status`);
+        const res = await fetch(`${getApiBaseUrl()}/api/lectures/${activeJobId}/status`);
         if (res.ok) {
           const data = await res.json();
           setJobStatus(data.status);
@@ -121,7 +128,7 @@ export default function Home() {
   // Fetch results when complete
   const fetchResults = async (jobId: string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/lectures/${jobId}/results`);
+      const res = await fetch(`${getApiBaseUrl()}/api/lectures/${jobId}/results`);
       if (res.ok) {
         const data = await res.json();
         setLectureData(data);
@@ -135,7 +142,7 @@ export default function Home() {
   // Fetch past lectures for history drawer
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/lectures`);
+      const res = await fetch(`${getApiBaseUrl()}/api/lectures`);
       if (res.ok) {
         const data = await res.json();
         setHistoryLectures(data);
@@ -152,7 +159,7 @@ export default function Home() {
 
   const handleDeleteLecture = async (jobId: string) => {
     try {
-      await fetch(`${API_BASE_URL}/api/lectures/${jobId}`, { method: 'DELETE' });
+      await fetch(`${getApiBaseUrl()}/api/lectures/${jobId}`, { method: 'DELETE' });
       fetchHistory();
       if (activeJobId === jobId) {
         setActiveJobId(null);
@@ -177,7 +184,7 @@ export default function Home() {
       try {
         setJobStatus('queued');
         setStatusMessage('Submitting YouTube link...');
-        const res = await fetch(`${API_BASE_URL}/api/lectures/youtube`, {
+        const res = await fetch(`${getApiBaseUrl()}/api/lectures/youtube`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -209,7 +216,7 @@ export default function Home() {
         formData.append('file', file);
         formData.append('rights_confirmed', 'true');
 
-        const res = await fetch(`${API_BASE_URL}/api/lectures/upload`, {
+        const res = await fetch(`${getApiBaseUrl()}/api/lectures/upload`, {
           method: 'POST',
           body: formData,
         });
