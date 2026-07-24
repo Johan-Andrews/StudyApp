@@ -80,7 +80,13 @@ class IVideoExtractor:
 
         video_id = extract_youtube_id(youtube_url) or str(uuid.uuid4())[:8]
 
-        # --- Primary: pytubefix ---
+        # --- Primary: youtube_transcript_api + oEmbed API (No bot checks, instant transcript) ---
+        try:
+            return IVideoExtractor._extract_with_transcript_api(youtube_url, video_id)
+        except Exception as e:
+            logger.warning(f"youtube_transcript_api failed: {e}. Falling back to pytubefix/yt-dlp.")
+
+        # --- Secondary: pytubefix ---
         try:
             return IVideoExtractor._extract_with_pytubefix(youtube_url, video_id, output_dir)
         except Exception as e:
@@ -88,6 +94,51 @@ class IVideoExtractor:
 
         # --- Fallback: yt-dlp ---
         return IVideoExtractor._extract_with_ytdlp(youtube_url, video_id, output_dir)
+
+    @staticmethod
+    def _extract_with_transcript_api(youtube_url: str, video_id: str) -> Dict[str, Any]:
+        """Fetches transcript directly via YouTube Transcript API without downloading media."""
+        import requests
+        from youtube_transcript_api import YouTubeTranscriptApi
+
+        title = f"YouTube Lecture ({video_id})"
+        try:
+            oembed_res = requests.get(f"https://www.youtube.com/oembed?url={youtube_url}&format=json", timeout=5)
+            if oembed_res.status_code == 200:
+                title = oembed_res.json().get("title", title)
+        except Exception as oe:
+            logger.warning(f"Failed to fetch oEmbed title: {oe}")
+
+        # Fetch transcript
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US', 'en-GB', 'a.en'])
+        if not transcript:
+            raise ValueError("No English transcript returned by API.")
+
+        captions_segments = []
+        for item in transcript:
+            start = float(item.get('start', 0.0))
+            duration = float(item.get('duration', 0.0))
+            captions_segments.append({
+                "start_time": round(start, 2),
+                "end_time": round(start + duration, 2),
+                "text": str(item.get('text', '')).replace('\n', ' ').strip()
+            })
+
+        captions_text = " ".join([s["text"] for s in captions_segments if s.get("text")])
+        duration = captions_segments[-1]["end_time"] if captions_segments else 0.0
+
+        logger.info(f"youtube_transcript_api extracted {len(captions_segments)} segments successfully!")
+
+        return {
+            "title": title,
+            "duration": duration,
+            "audio_path": None,
+            "has_captions": True,
+            "captions_text": captions_text,
+            "captions_segments": captions_segments,
+            "source_type": "youtube",
+            "youtube_id": video_id
+        }
 
     @staticmethod
     def _extract_with_pytubefix(youtube_url: str, video_id: str, output_dir: Path) -> Dict[str, Any]:
