@@ -95,7 +95,7 @@ class IVideoExtractor:
         from pytubefix import YouTube
         from pytubefix.cli import on_progress
 
-        yt = YouTube(youtube_url, on_progress_callback=on_progress, use_oauth=False, allow_oauth_cache=False)
+        yt = YouTube(youtube_url, on_progress_callback=on_progress, use_oauth=False, allow_oauth_cache=False, client='ANDROID')
 
         title = yt.title or f"YouTube Lecture ({video_id})"
         duration = yt.length or 0
