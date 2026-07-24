@@ -103,9 +103,16 @@ class IVideoExtractor:
             'skip_download': False,
             'quiet': True,
             'no_warnings': True,
+            # Android client bypasses n-challenge JS requirement on headless servers
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'web'],
+                    'player_skip': ['webpage', 'config'],
+                }
+            },
         }
 
-        # Use cookies file if it exists (upload youtube_cookies.txt to backend folder)
+        # Use cookies file if it exists
         if cookies_path.exists():
             ydl_opts['cookiefile'] = str(cookies_path)
             logger.info("Using YouTube cookies file for authentication.")
