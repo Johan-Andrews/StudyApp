@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useRef, useImperativeHandle, forwardRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw } from 'lucide-react';
 
 export interface MediaSyncPlayerRef {
   seekTo: (seconds: number) => void;
@@ -22,7 +21,6 @@ export const MediaSyncPlayer = forwardRef<MediaSyncPlayerRef, MediaSyncPlayerPro
     useImperativeHandle(ref, () => ({
       seekTo: (seconds: number) => {
         if (sourceType === 'youtube') {
-          // If YouTube embed, update iframe src with start time
           if (iframeRef.current) {
             let ytId = extractYoutubeId(mediaUrl);
             if (ytId) {
@@ -48,20 +46,22 @@ export const MediaSyncPlayer = forwardRef<MediaSyncPlayerRef, MediaSyncPlayerPro
     const fullMediaUrl = mediaUrl.startsWith('http') ? mediaUrl : `${apiBaseUrl}${mediaUrl}`;
 
     return (
-      <div className="glass-panel rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
-        <div className="bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+      <div className="warm-card overflow-hidden">
+        {/* Player Header */}
+        <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: 'var(--border-warm)', background: 'var(--bg-card-alt)' }}>
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-            <h3 className="text-sm font-semibold text-slate-200 truncate max-w-md">
+            <div className="pulse-dot" />
+            <h3 className="text-sm font-semibold truncate max-w-xs" style={{ color: 'var(--text-primary)' }}>
               {title || 'Lecture Source Player'}
             </h3>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-cyan-400 font-mono border border-cyan-500/20">
-            {isYoutube ? 'YouTube Source' : 'Uploaded Media'}
+          <span className="badge-olive text-[10px]">
+            {isYoutube ? 'YouTube' : 'Uploaded'}
           </span>
         </div>
 
-        <div className="relative aspect-video bg-black flex items-center justify-center">
+        {/* Video Area */}
+        <div className="relative aspect-video" style={{ background: '#1a1a1a' }}>
           {isYoutube && youtubeId ? (
             <iframe
               ref={iframeRef}

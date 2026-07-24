@@ -4,8 +4,30 @@ from typing import Dict, Any, List
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.lib.units import inch, mm
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, 
+    HRFlowable, KeepTogether, ListFlowable, ListItem
+)
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from config import settings
+
+# ── Color Palette (Warm Editorial - matching reference notes) ──
+CREAM_BG     = colors.HexColor('#FAF7F2')
+CARD_BG      = colors.HexColor('#FFFFFF')
+SECTION_BG   = colors.HexColor('#F5F0E8')
+BORDER_WARM  = colors.HexColor('#E5DDD0')
+BORDER_STRONG= colors.HexColor('#C8BCA8')
+TEXT_PRIMARY  = colors.HexColor('#2C2316')
+TEXT_SECONDARY= colors.HexColor('#5C4F3A')
+TEXT_MUTED   = colors.HexColor('#8A7E6B')
+ACCENT_OLIVE = colors.HexColor('#7B8C3E')
+ACCENT_BROWN = colors.HexColor('#8B6F47')
+ACCENT_BROWN_LT = colors.HexColor('#C9A96E')
+ACCENT_TERRACOTTA = colors.HexColor('#C17F59')
+ACCENT_SAGE  = colors.HexColor('#9CAF88')
+CTA_GREEN    = colors.HexColor('#B8D44A')
+
 
 class IExporterService:
     """Service interface for exporting notes, quizzes, study guides into PDF, Markdown, and Anki formats."""
@@ -63,101 +85,326 @@ class IExporterService:
 
     @classmethod
     def export_pdf(cls, title: str, structured_content: Dict[str, Any], output_path: Path) -> Path:
-        """Generates a styled PDF document using ReportLab."""
+        """Generates a beautifully styled editorial PDF matching the warm reference note design."""
         doc = SimpleDocTemplate(
             str(output_path),
             pagesize=letter,
-            rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
+            rightMargin=48, leftMargin=48, topMargin=48, bottomMargin=48
         )
         styles = getSampleStyleSheet()
 
-        # Custom styles
+        # ── Custom Styles ──
         title_style = ParagraphStyle(
-            'DocTitle',
+            'WarmTitle',
             parent=styles['Heading1'],
             fontName='Helvetica-Bold',
-            fontSize=22,
-            leading=26,
-            textColor=colors.HexColor('#0F172A'),
-            spaceAfter=6
+            fontSize=26,
+            leading=32,
+            textColor=TEXT_PRIMARY,
+            spaceAfter=4,
+            alignment=TA_LEFT
         )
+
         subtitle_style = ParagraphStyle(
-            'DocSubtitle',
+            'WarmSubtitle',
             parent=styles['Normal'],
             fontName='Helvetica-Oblique',
             fontSize=10,
-            textColor=colors.HexColor('#64748B'),
-            spaceAfter=15
+            textColor=TEXT_MUTED,
+            spaceAfter=20,
+            alignment=TA_LEFT
         )
-        h2_style = ParagraphStyle(
-            'Heading2Custom',
+
+        section_header_style = ParagraphStyle(
+            'SectionHeader',
             parent=styles['Heading2'],
             fontName='Helvetica-Bold',
             fontSize=14,
             leading=18,
-            textColor=colors.HexColor('#1E293B'),
-            spaceBefore=12,
-            spaceAfter=6
+            textColor=TEXT_PRIMARY,
+            spaceBefore=18,
+            spaceAfter=8,
+            borderWidth=0,
         )
+
+        subsection_style = ParagraphStyle(
+            'SubsectionTitle',
+            parent=styles['Heading3'],
+            fontName='Helvetica-Bold',
+            fontSize=11,
+            leading=14,
+            textColor=ACCENT_BROWN,
+            spaceBefore=10,
+            spaceAfter=4,
+        )
+
         body_style = ParagraphStyle(
-            'BodyCustom',
+            'WarmBody',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=10,
+            leading=15,
+            textColor=TEXT_SECONDARY,
+            spaceAfter=8,
+        )
+
+        bullet_style = ParagraphStyle(
+            'WarmBullet',
             parent=styles['Normal'],
             fontName='Helvetica',
             fontSize=10,
             leading=14,
-            textColor=colors.HexColor('#334155'),
-            spaceAfter=8
+            textColor=TEXT_SECONDARY,
+            leftIndent=16,
+            spaceAfter=4,
+            bulletIndent=0,
+        )
+
+        timestamp_style = ParagraphStyle(
+            'Timestamp',
+            parent=styles['Normal'],
+            fontName='Courier',
+            fontSize=8,
+            textColor=ACCENT_OLIVE,
+            spaceAfter=2,
+        )
+
+        tip_style = ParagraphStyle(
+            'TipBox',
+            parent=styles['Normal'],
+            fontName='Helvetica-Oblique',
+            fontSize=9,
+            leading=13,
+            textColor=ACCENT_OLIVE,
+            leftIndent=10,
+            borderPadding=6,
+            spaceAfter=10,
+        )
+
+        term_style = ParagraphStyle(
+            'TermBold',
+            parent=styles['Normal'],
+            fontName='Helvetica-Bold',
+            fontSize=10,
+            leading=14,
+            textColor=TEXT_PRIMARY,
+        )
+
+        definition_style = ParagraphStyle(
+            'Definition',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=10,
+            leading=14,
+            textColor=TEXT_SECONDARY,
+        )
+
+        quiz_q_style = ParagraphStyle(
+            'QuizQuestion',
+            parent=styles['Normal'],
+            fontName='Helvetica-Bold',
+            fontSize=10,
+            leading=14,
+            textColor=TEXT_PRIMARY,
+            spaceAfter=4,
+        )
+
+        quiz_a_style = ParagraphStyle(
+            'QuizAnswer',
+            parent=styles['Normal'],
+            fontName='Helvetica-Oblique',
+            fontSize=9,
+            leading=13,
+            textColor=ACCENT_OLIVE,
+            leftIndent=16,
+            spaceAfter=2,
+        )
+
+        quiz_explain_style = ParagraphStyle(
+            'QuizExplanation',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=9,
+            leading=13,
+            textColor=TEXT_MUTED,
+            leftIndent=16,
+            spaceAfter=10,
+        )
+
+        footer_style = ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=8,
+            textColor=TEXT_MUTED,
+            alignment=TA_CENTER,
+            spaceBefore=20,
         )
 
         elements = []
-        elements.append(Paragraph(title, title_style))
-        elements.append(Paragraph("Clipnote AI Generated Lecture Summary & Notes", subtitle_style))
-        elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E2E8F0'), spaceAfter=15))
 
-        # Study Guide
+        # ── Title Block ──
+        elements.append(Paragraph(title, title_style))
+        elements.append(Paragraph("Clipnote AI &bull; Lecture Notes &amp; Study Material", subtitle_style))
+        elements.append(HRFlowable(
+            width="100%", thickness=2, color=ACCENT_OLIVE,
+            spaceAfter=20, spaceBefore=0
+        ))
+
+        # ── Study Guide Section ──
         if structured_content.get("study_guide"):
-            elements.append(Paragraph("Executive Study Guide", h2_style))
+            elements.append(cls._section_banner("EXECUTIVE STUDY GUIDE", "01"))
             guide_lines = structured_content["study_guide"].split("\n")
             for line in guide_lines:
                 if line.strip():
                     clean_line = line.replace("#", "").replace("*", "").strip()
-                    elements.append(Paragraph(clean_line, body_style))
-            elements.append(Spacer(1, 10))
+                    if clean_line.startswith("- ") or clean_line.startswith("* "):
+                        elements.append(Paragraph(f"&#8226; {clean_line[2:]}", bullet_style))
+                    else:
+                        elements.append(Paragraph(clean_line, body_style))
+            elements.append(Spacer(1, 14))
 
-        # Notes
+        # ── Sectioned Notes ──
         notes = structured_content.get("notes", [])
         if notes:
-            elements.append(Paragraph("Sectioned Notes", h2_style))
-            for item in notes:
+            elements.append(cls._section_banner("SECTIONED NOTES", "02"))
+            for i, item in enumerate(notes):
                 sec_title = item.get("section_title", "Section")
                 content = item.get("content", "")
-                elements.append(Paragraph(f"<b>{sec_title}</b>", body_style))
-                elements.append(Paragraph(content, body_style))
-                elements.append(Spacer(1, 4))
+                ts = item.get("timestamp_reference", 0.0)
+                minutes = int(ts // 60)
+                seconds = int(ts % 60)
+                ts_str = f"[{minutes:02d}:{seconds:02d}]"
+
+                elements.append(Paragraph(f"{sec_title}", subsection_style))
+                elements.append(Paragraph(ts_str, timestamp_style))
+
+                for line in content.split("\n"):
+                    if line.strip():
+                        clean = line.strip()
+                        if clean.startswith("- ") or clean.startswith("* "):
+                            elements.append(Paragraph(f"&#8226; {clean[2:]}", bullet_style))
+                        else:
+                            elements.append(Paragraph(clean, body_style))
+                elements.append(Spacer(1, 6))
             elements.append(Spacer(1, 10))
 
-        # Key Concepts Table
+        # ── Key Concepts Glossary Table ──
         concepts = structured_content.get("key_concepts", [])
         if concepts:
-            elements.append(Paragraph("Key Concepts Glossary", h2_style))
-            table_data = [["Term", "Definition"]]
-            for c in concepts:
-                table_data.append([c.get("term", ""), c.get("definition", "")])
+            elements.append(cls._section_banner("KEY CONCEPTS GLOSSARY", "03"))
 
-            t = Table(table_data, colWidths=[150, 380])
+            table_data = [
+                [Paragraph("<b>Term</b>", term_style), 
+                 Paragraph("<b>Definition</b>", definition_style)]
+            ]
+            for c in concepts:
+                table_data.append([
+                    Paragraph(c.get("term", ""), term_style),
+                    Paragraph(c.get("definition", ""), definition_style)
+                ])
+
+            t = Table(table_data, colWidths=[140, 380])
             t.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F1F5F9')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
+                # Header row
+                ('BACKGROUND', (0, 0), (-1, 0), SECTION_BG),
+                ('TEXTCOLOR', (0, 0), (-1, 0), TEXT_PRIMARY),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                # Body
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                # Borders
+                ('LINEBELOW', (0, 0), (-1, 0), 1.5, ACCENT_OLIVE),
+                ('LINEBELOW', (0, 1), (-1, -1), 0.5, BORDER_WARM),
+                # Alternating row backgrounds
+                *[('BACKGROUND', (0, i), (-1, i), CREAM_BG) for i in range(2, len(table_data), 2)],
             ]))
             elements.append(t)
+            elements.append(Spacer(1, 14))
+
+        # ── Quiz Section ──
+        quiz = structured_content.get("quiz", [])
+        if quiz:
+            elements.append(cls._section_banner("SELF-ASSESSMENT QUIZ", "04"))
+
+            for i, q in enumerate(quiz, 1):
+                question_text = q.get("question", "")
+                elements.append(Paragraph(
+                    f"<b>Q{i}.</b> {question_text}", quiz_q_style
+                ))
+
+                if q.get("type") == "mcq" and q.get("options"):
+                    option_letters = ["A", "B", "C", "D", "E", "F"]
+                    for j, opt in enumerate(q["options"]):
+                        letter_label = option_letters[j] if j < len(option_letters) else str(j+1)
+                        elements.append(Paragraph(
+                            f"({letter_label}) {opt}", bullet_style
+                        ))
+
+                elements.append(Paragraph(
+                    f"Answer: {q.get('correct_answer', '')}", quiz_a_style
+                ))
+                if q.get("explanation"):
+                    elements.append(Paragraph(
+                        f"Explanation: {q['explanation']}", quiz_explain_style
+                    ))
+                elements.append(Spacer(1, 6))
+
+        # ── Footer ──
+        elements.append(HRFlowable(
+            width="100%", thickness=1, color=BORDER_WARM,
+            spaceAfter=10, spaceBefore=20
+        ))
+        elements.append(Paragraph(
+            "Generated by Clipnote AI Lecture Note Taker &bull; clipnote.app",
+            footer_style
+        ))
 
         doc.build(elements)
         return output_path
+
+    @classmethod
+    def _section_banner(cls, title: str, number: str):
+        """Creates a styled section banner with number badge and title, matching reference editorial style."""
+        styles = getSampleStyleSheet()
+        
+        banner_data = [[
+            Paragraph(
+                f'<font color="#FFFFFF"><b>{number}</b></font>', 
+                ParagraphStyle('BannerNum', parent=styles['Normal'], 
+                    fontName='Helvetica-Bold', fontSize=11, alignment=TA_CENTER, 
+                    textColor=colors.white, leading=14)
+            ),
+            Paragraph(
+                f'<font color="#2C2316"><b>{title}</b></font>',
+                ParagraphStyle('BannerTitle', parent=styles['Normal'],
+                    fontName='Helvetica-Bold', fontSize=11, 
+                    textColor=TEXT_PRIMARY, leading=14,
+                    spaceBefore=0, spaceAfter=0)
+            )
+        ]]
+        
+        t = Table(banner_data, colWidths=[36, 484])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, 0), ACCENT_OLIVE),
+            ('BACKGROUND', (1, 0), (1, 0), SECTION_BG),
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('ALIGN', (1, 0), (1, 0), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (0, 0), 6),
+            ('LEFTPADDING', (1, 0), (1, 0), 12),
+            ('ROUNDEDCORNERS', [4, 4, 4, 4]),
+            ('BOX', (0, 0), (-1, -1), 0.5, BORDER_WARM),
+        ]))
+        
+        return KeepTogether([Spacer(1, 12), t, Spacer(1, 10)])
 
     @classmethod
     def export_anki(cls, structured_content: Dict[str, Any]) -> str:

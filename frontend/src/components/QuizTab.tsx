@@ -48,9 +48,9 @@ export const QuizTab: React.FC<QuizTabProps> = ({ quiz, onTimestampClick }) => {
 
   if (!quiz || quiz.length === 0) {
     return (
-      <div className="p-8 text-center glass-card rounded-2xl">
-        <HelpCircle className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-        <p className="text-slate-400">No quiz questions generated for this lecture.</p>
+      <div className="warm-card p-12 text-center">
+        <HelpCircle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--border-strong)' }} />
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No quiz questions generated for this lecture.</p>
       </div>
     );
   }
@@ -59,61 +59,62 @@ export const QuizTab: React.FC<QuizTabProps> = ({ quiz, onTimestampClick }) => {
   const score = calculateScore();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Quiz Controls & Score Header */}
-      <div className="glass-card rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 border border-cyan-500/20">
+      <div className="warm-card p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-            <Award className="w-6 h-6" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(123, 140, 62, 0.12)' }}>
+            <Award className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: 'var(--accent-olive)' }} />
           </div>
           <div>
-            <h4 className="text-base font-bold text-slate-100">Self-Assessment Quiz</h4>
-            <p className="text-xs text-slate-400">
-              Answered {answeredCount} of {quiz.length} questions • Current Score: <span className="font-bold text-cyan-400">{score}</span> / {quiz.length}
+            <h4 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Self-Assessment Quiz</h4>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Answered {answeredCount} of {quiz.length} &bull; Score: <span className="font-bold" style={{ color: 'var(--accent-olive)' }}>{score}</span> / {quiz.length}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           <button
             onClick={() => setShowAnswerKey(!showAnswerKey)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-all"
+            className="btn-warm inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs"
           >
-            {showAnswerKey ? <EyeOff className="w-4 h-4 text-cyan-400" /> : <Eye className="w-4 h-4 text-cyan-400" />}
-            {showAnswerKey ? 'Hide Answer Key' : 'Show Answer Key'}
+            {showAnswerKey ? <EyeOff className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+            <span className="hidden sm:inline">{showAnswerKey ? 'Hide Answers' : 'Show Answers'}</span>
+            <span className="sm:hidden">{showAnswerKey ? 'Hide' : 'Show'}</span>
           </button>
 
           <button
             onClick={handleResetQuiz}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition-all"
+            className="btn-warm inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Reset Quiz
+            <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">Reset</span>
           </button>
         </div>
       </div>
 
-      {/* Questions List */}
+      {/* Questions */}
       {quiz.map((q, idx) => {
         const selected = userAnswers[q.id];
         const isAnswered = Boolean(selected);
         const isCorrect = isAnswered && selected.trim().toLowerCase() === q.correct_answer.trim().toLowerCase();
 
         return (
-          <div key={q.id || idx} className="glass-card rounded-2xl p-6 space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 font-mono">
-                  Question {idx + 1}
+          <div key={q.id || idx} className="warm-card p-4 sm:p-6 space-y-4">
+            <div className="flex items-start justify-between gap-3 sm:gap-4">
+              <div className="flex items-start gap-2 sm:gap-3 min-w-0">
+                <span className="section-number text-xs shrink-0" style={{ background: 'var(--accent-brown)', minWidth: '28px', width: '28px', height: '28px' }}>
+                  {String(idx + 1).padStart(2, '0')}
                 </span>
-                <h4 className="text-base font-medium text-slate-100 leading-snug">
+                <h4 className="text-xs sm:text-sm font-medium leading-snug pt-0.5" style={{ color: 'var(--text-primary)' }}>
                   {q.question}
                 </h4>
               </div>
 
               <button
                 onClick={() => onTimestampClick(q.timestamp_reference)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-cyan-500/20 text-cyan-400 text-xs font-mono border border-slate-700 transition-all shrink-0"
+                className="timestamp-chip shrink-0"
               >
                 <Clock className="w-3 h-3" />
                 {formatTime(q.timestamp_reference)}
@@ -122,31 +123,29 @@ export const QuizTab: React.FC<QuizTabProps> = ({ quiz, onTimestampClick }) => {
 
             {/* MCQ Options */}
             {q.type === 'mcq' && q.options && (
-              <div className="grid grid-cols-1 gap-2.5 pt-2">
+              <div className="grid grid-cols-1 gap-2 sm:pl-10">
                 {q.options.map((opt, oIdx) => {
                   const isThisSelected = selected === opt;
                   const isThisCorrect = opt.trim().toLowerCase() === q.correct_answer.trim().toLowerCase();
 
-                  let btnStyle = "border-slate-800 bg-slate-900/60 hover:bg-slate-800/80 text-slate-300";
+                  let optClass = 'quiz-option';
                   if (isThisSelected) {
-                    if (isThisCorrect) {
-                      btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-300 font-medium";
-                    } else {
-                      btnStyle = "border-rose-500/50 bg-rose-500/10 text-rose-300";
-                    }
+                    optClass = isThisCorrect ? 'quiz-option quiz-option-correct' : 'quiz-option quiz-option-wrong';
                   } else if (showAnswerKey && isThisCorrect) {
-                    btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-300 font-medium";
+                    optClass = 'quiz-option quiz-option-correct';
                   }
 
                   return (
                     <button
                       key={oIdx}
                       onClick={() => handleSelectOption(q.id, opt)}
-                      className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all flex items-center justify-between ${btnStyle}`}
+                      className={`w-full text-left text-xs sm:text-sm flex items-center justify-between ${optClass}`}
                     >
-                      <span>{opt}</span>
+                      <span className="break-words pr-2">{opt}</span>
                       {isThisSelected && (
-                        isThisCorrect ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-rose-400" />
+                        isThisCorrect 
+                          ? <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: 'var(--accent-olive)' }} /> 
+                          : <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" style={{ color: 'var(--accent-terracotta)' }} />
                       )}
                     </button>
                   );
@@ -154,28 +153,28 @@ export const QuizTab: React.FC<QuizTabProps> = ({ quiz, onTimestampClick }) => {
               </div>
             )}
 
-            {/* Short Answer Input */}
+            {/* Short Answer */}
             {q.type === 'short_answer' && (
-              <div className="space-y-2 pt-2">
+              <div className="sm:pl-10">
                 <input
                   type="text"
                   placeholder="Type your answer here..."
                   value={selected || ''}
                   onChange={(e) => handleSelectOption(q.id, e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500/50"
+                  className="warm-input w-full px-3 sm:px-4 py-2 text-xs sm:text-sm"
                 />
               </div>
             )}
 
-            {/* Explanation & Answer Key Reveal */}
+            {/* Explanation */}
             {(showAnswerKey || isAnswered) && (
-              <div className="mt-3 p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 space-y-1">
-                <p className="font-semibold text-cyan-400">
-                  Correct Answer: <span className="text-slate-100">{q.correct_answer}</span>
+              <div className="sm:ml-10 p-3 rounded-xl text-xs space-y-1" style={{ background: 'var(--bg-card-alt)', border: '1px solid var(--border-warm)' }}>
+                <p className="font-semibold" style={{ color: 'var(--accent-olive)' }}>
+                  Correct Answer: <span style={{ color: 'var(--text-primary)' }}>{q.correct_answer}</span>
                 </p>
                 {q.explanation && (
-                  <p className="text-slate-400 leading-relaxed">
-                    <span className="text-slate-300 font-medium">Explanation:</span> {q.explanation}
+                  <p style={{ color: 'var(--text-muted)' }}>
+                    <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>Explanation:</span> {q.explanation}
                   </p>
                 )}
               </div>

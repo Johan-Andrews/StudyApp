@@ -2,90 +2,370 @@
 
 @layer base {
   :root {
-    --font-inter: 'Inter', sans-serif;
-    --background: #0B0F17;
-    --card-bg: rgba(15, 23, 42, 0.75);
-    --border-color: rgba(255, 255, 255, 0.1);
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+    --bg-warm: #FAF7F2;
+    --bg-card: #FFFFFF;
+    --bg-card-alt: #F5F0E8;
+    --bg-section: #EDE8DE;
+    --border-warm: #E5DDD0;
+    --border-strong: #C8BCA8;
+    --text-primary: #2C2316;
+    --text-secondary: #5C4F3A;
+    --text-muted: #8A7E6B;
+    --accent-olive: #7B8C3E;
+    --accent-olive-light: #A4B860;
+    --accent-brown: #8B6F47;
+    --accent-brown-light: #C9A96E;
+    --accent-sage: #9CAF88;
+    --accent-terracotta: #C17F59;
+    --accent-green-cta: #B8D44A;
+    --accent-green-cta-hover: #A8C43A;
+    --shadow-soft: 0 2px 16px rgba(44, 35, 22, 0.06);
+    --shadow-card: 0 4px 24px rgba(44, 35, 22, 0.08);
+    --shadow-elevated: 0 12px 40px rgba(44, 35, 22, 0.12);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+  }
+
+  * {
+    box-sizing: border-box;
   }
 
   body {
-    background-color: var(--background);
-    color: #F8FAFC;
-    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-warm);
+    color: var(--text-primary);
+    font-family: var(--font-body);
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
   }
 }
 
-/* Glassmorphism effects */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+/* ── Warm Cards & Panels ── */
+.warm-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-card {
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-  background: rgba(30, 41, 59, 0.75);
-  border-color: rgba(56, 189, 248, 0.3);
+.warm-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-elevated);
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px -10px rgba(56, 189, 248, 0.15);
 }
 
-/* Vibrant Glow Gradients */
-.gradient-text {
-  background: linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.warm-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
 }
 
-.gradient-btn {
-  background: linear-gradient(135deg, #0284C7 0%, #4F46E5 100%);
+.warm-section {
+  background: var(--bg-card-alt);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Gradient CTA Button (Lime Green - Reference Design Inspired) ── */
+.cta-btn {
+  background: linear-gradient(135deg, #C5E04B 0%, #A4C639 100%);
+  color: #2C2316;
+  font-weight: 700;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 4px 16px rgba(164, 198, 57, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s;
+}
+
+.cta-btn:hover::before {
+  left: 100%;
+}
+
+.cta-btn:hover {
+  background: linear-gradient(135deg, #B8D44A 0%, #8FB830 100%);
+  box-shadow: 0 6px 24px rgba(164, 198, 57, 0.45);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.cta-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* ── Accent Buttons ── */
+.btn-warm {
+  background: var(--bg-card-alt);
+  border: 1px solid var(--border-warm);
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-radius: var(--radius-md);
   transition: all 0.25s ease;
 }
 
-.gradient-btn:hover {
-  background: linear-gradient(135deg, #0369A1 0%, #4338CA 100%);
-  box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
-  transform: scale(1.02);
+.btn-warm:hover {
+  background: var(--bg-section);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }
 
-/* Custom scrollbars */
+/* ── Input Fields ── */
+.warm-input {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-warm);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.25s ease;
+}
+
+.warm-input:focus {
+  outline: none;
+  border-color: var(--accent-olive);
+  box-shadow: 0 0 0 3px rgba(123, 140, 62, 0.12);
+}
+
+.warm-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── Badge / Chip / Pill ── */
+.badge-olive {
+  background: rgba(123, 140, 62, 0.12);
+  color: var(--accent-olive);
+  font-weight: 600;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+}
+
+.badge-brown {
+  background: rgba(139, 111, 71, 0.12);
+  color: var(--accent-brown);
+  font-weight: 600;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+}
+
+.badge-terracotta {
+  background: rgba(193, 127, 89, 0.1);
+  color: var(--accent-terracotta);
+  font-weight: 600;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+}
+
+/* ── Section Numbered Badge ── */
+.section-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-olive);
+  color: white;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Timestamp Chip ── */
+.timestamp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(123, 140, 62, 0.1);
+  border: 1px solid rgba(123, 140, 62, 0.2);
+  color: var(--accent-olive);
+  font-family: 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timestamp-chip:hover {
+  background: rgba(123, 140, 62, 0.2);
+  border-color: var(--accent-olive);
+  transform: scale(1.05);
+}
+
+/* ── Custom Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--bg-card-alt);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
-  border-radius: 9999px;
+  background: var(--border-strong);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(56, 189, 248, 0.4);
+  background: var(--accent-brown);
 }
 
-/* Pulse Glow Animation */
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
-  }
+/* ── Divider ── */
+.warm-divider {
+  border: none;
+  height: 1px;
+  background: var(--border-warm);
+  margin: 0;
 }
 
-.glow-active {
-  animation: pulseGlow 3s infinite ease-in-out;
+/* ── Progress Bar ── */
+.progress-track {
+  background: var(--bg-section);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, var(--accent-olive), var(--accent-green-cta));
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Pulse Dot Animation ── */
+@keyframes gentlePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-olive);
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+/* ── Float In Animation ── */
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-float-in {
+  animation: floatIn 0.5s ease-out forwards;
+}
+
+/* ── Shimmer (Footer Divider) ── */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ── Hero Image Overlay ── */
+.hero-overlay {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+}
+
+.hero-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, 
+    rgba(250, 247, 242, 0.1) 0%, 
+    rgba(250, 247, 242, 0.6) 60%,
+    rgba(250, 247, 242, 0.95) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Tab Navigation ── */
+.tab-active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-warm);
+  box-shadow: var(--shadow-soft);
+  font-weight: 600;
+}
+
+.tab-inactive {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  font-weight: 500;
+}
+
+.tab-inactive:hover {
+  color: var(--text-secondary);
+  background: rgba(237, 232, 222, 0.5);
+}
+
+/* ── Quiz Option States ── */
+.quiz-option {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-warm);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quiz-option:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-card-alt);
+}
+
+.quiz-option-correct {
+  background: rgba(123, 140, 62, 0.08);
+  border-color: var(--accent-olive);
+  color: var(--accent-olive);
+}
+
+.quiz-option-wrong {
+  background: rgba(193, 127, 89, 0.08);
+  border-color: var(--accent-terracotta);
+  color: var(--accent-terracotta);
+}
+
+/* ── Glassmorphism for Modals ── */
+.modal-backdrop {
+  background: rgba(44, 35, 22, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(123, 140, 62, 0.25);
+  color: var(--text-primary);
 }

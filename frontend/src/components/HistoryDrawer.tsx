@@ -36,60 +36,62 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-md h-full glass-panel border-l border-slate-800 p-6 flex flex-col justify-between shadow-2xl">
-        <div className="space-y-6 flex-1 overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex justify-end modal-backdrop">
+      <div className="w-full max-w-md h-full p-6 flex flex-col justify-between shadow-2xl border-l"
+        style={{ background: 'var(--bg-warm)', borderColor: 'var(--border-warm)' }}>
+        <div className="space-y-5 flex-1 overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="flex items-center justify-between pb-4" style={{ borderBottom: '1px solid var(--border-warm)' }}>
             <div className="flex items-center gap-2">
-              <History className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-lg font-bold text-slate-100">Lecture History</h3>
+              <History className="w-5 h-5" style={{ color: 'var(--accent-olive)' }} />
+              <h3 className="font-display text-lg" style={{ color: 'var(--text-primary)' }}>Lecture History</h3>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg transition-colors hover:bg-[var(--bg-card-alt)]"
+              style={{ color: 'var(--text-muted)' }}
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Search bar */}
+          {/* Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 absolute left-3 top-3" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search past lectures..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500/50"
+              className="warm-input w-full pl-9 pr-4 py-2.5 text-xs"
             />
           </div>
 
           {/* List */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
             {filtered.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 text-sm">
+              <div className="text-center py-12 text-sm" style={{ color: 'var(--text-muted)' }}>
                 No past lectures found.
               </div>
             ) : (
               filtered.map((lecture) => (
                 <div
                   key={lecture.id}
-                  className="glass-card rounded-xl p-4 border border-slate-800/80 hover:border-cyan-500/30 transition-all flex items-center justify-between group"
+                  className="warm-card p-4 flex items-center justify-between group"
                 >
                   <div className="space-y-1 flex-1 min-w-0 pr-3">
                     <div className="flex items-center gap-2">
                       {lecture.source_type === 'youtube' ? (
-                        <Video className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                        <Video className="w-3.5 h-3.5 shrink-0" style={{ color: '#DC2626' }} />
                       ) : (
-                        <Upload className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <Upload className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--accent-olive)' }} />
                       )}
-                      <h4 className="text-sm font-semibold text-slate-200 truncate group-hover:text-cyan-300 transition-colors">
+                      <h4 className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                         {lecture.title}
                       </h4>
                     </div>
-                    <p className="text-[10px] text-slate-400 font-mono">
-                      {new Date(lecture.created_at).toLocaleDateString()} • {lecture.status}
+                    <p className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                      {new Date(lecture.created_at).toLocaleDateString()} &bull; {lecture.status}
                     </p>
                   </div>
 
@@ -99,14 +101,16 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
                         onSelectLecture(lecture.id);
                         onClose();
                       }}
-                      className="p-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 transition-all"
+                      className="p-2 rounded-lg transition-all"
+                      style={{ background: 'rgba(123, 140, 62, 0.1)', color: 'var(--accent-olive)', border: '1px solid rgba(123, 140, 62, 0.2)' }}
                       title="Open Lecture"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onDeleteLecture(lecture.id)}
-                      className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all"
+                      className="p-2 rounded-lg transition-all"
+                      style={{ background: 'rgba(193, 127, 89, 0.1)', color: 'var(--accent-terracotta)', border: '1px solid rgba(193, 127, 89, 0.2)' }}
                       title="Delete Lecture"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

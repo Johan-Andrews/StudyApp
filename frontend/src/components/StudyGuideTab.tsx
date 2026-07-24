@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, BookMarked } from 'lucide-react';
 
 interface StudyGuideTabProps {
   studyGuide: string;
@@ -10,21 +10,25 @@ interface StudyGuideTabProps {
 export const StudyGuideTab: React.FC<StudyGuideTabProps> = ({ studyGuide }) => {
   if (!studyGuide) {
     return (
-      <div className="p-8 text-center glass-card rounded-2xl">
-        <FileText className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-        <p className="text-slate-400">No study guide available.</p>
+      <div className="warm-card p-12 text-center">
+        <FileText className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--border-strong)' }} />
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No study guide available.</p>
       </div>
     );
   }
 
   return (
-    <div className="glass-card rounded-2xl p-8 space-y-4 border border-cyan-500/20">
-      <div className="flex items-center gap-2 pb-4 border-b border-slate-800 text-cyan-400">
-        <FileText className="w-5 h-5" />
-        <h3 className="text-lg font-bold text-slate-100">Executive Revision Study Guide</h3>
+    <div className="warm-card p-5 sm:p-8 space-y-5">
+      <div className="flex items-center gap-2.5 pb-4" style={{ borderBottom: '1px solid var(--border-warm)' }}>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(123, 140, 62, 0.12)' }}>
+          <BookMarked className="w-4 h-4" style={{ color: 'var(--accent-olive)' }} />
+        </div>
+        <h3 className="font-display text-lg" style={{ color: 'var(--text-primary)' }}>
+          Executive Revision Study Guide
+        </h3>
       </div>
 
-      <div className="prose prose-invert prose-cyan max-w-none text-slate-300 text-sm leading-relaxed whitespace-pre-line space-y-4">
+      <div className="text-sm leading-relaxed whitespace-pre-line space-y-3" style={{ color: 'var(--text-secondary)' }}>
         {studyGuide}
       </div>
     </div>

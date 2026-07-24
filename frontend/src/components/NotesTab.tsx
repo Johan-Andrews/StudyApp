@@ -23,36 +23,36 @@ export const NotesTab: React.FC<NotesTabProps> = ({ notes, onTimestampClick }) =
 
   if (!notes || notes.length === 0) {
     return (
-      <div className="p-8 text-center glass-card rounded-2xl">
-        <BookOpen className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-        <p className="text-slate-400">No notes generated yet.</p>
+      <div className="warm-card p-12 text-center">
+        <BookOpen className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--border-strong)' }} />
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No notes generated yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {notes.map((item, idx) => (
-        <div 
-          key={idx} 
-          className="glass-card rounded-2xl p-6 hover:border-cyan-500/30 transition-all duration-300 group"
-        >
-          <div className="flex items-center justify-between gap-4 mb-3 pb-3 border-b border-slate-800">
-            <h4 className="text-lg font-semibold text-slate-100 group-hover:text-cyan-300 transition-colors flex items-center gap-2">
-              <ChevronRight className="w-4 h-4 text-cyan-400" />
-              {item.section_title}
-            </h4>
+    <div className="space-y-4">
+      {notes.map((item, idx) => (          <div key={idx} className="warm-card p-4 sm:p-6 group">
+          {/* Section Header */}
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-4 pb-3" style={{ borderBottom: '1px solid var(--border-warm)' }}>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <span className="section-number shrink-0">{String(idx + 1).padStart(2, '0')}</span>
+              <h4 className="text-sm sm:text-base font-semibold break-words" style={{ color: 'var(--text-primary)' }}>
+                {item.section_title}
+              </h4>
+            </div>
             <button
               onClick={() => onTimestampClick(item.timestamp_reference)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-xs font-mono font-medium border border-cyan-500/20 hover:border-cyan-500/40 transition-all"
+              className="timestamp-chip shrink-0 ml-auto"
               title="Click to jump player to this timestamp"
             >
-              <Clock className="w-3.5 h-3.5" />
+              <Clock className="w-3 h-3" />
               {formatTime(item.timestamp_reference)}
             </button>
           </div>
 
-          <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-line space-y-2">
+          {/* Content */}
+          <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-line space-y-2 sm:pl-11" style={{ color: 'var(--text-secondary)' }}>
             {item.content.split('\n').map((line, lIdx) => (
               <p key={lIdx} className="leading-relaxed">
                 {line}

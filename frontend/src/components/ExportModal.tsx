@@ -20,7 +20,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({ jobId, isOpen, onClose
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const exportUrl = `${apiBaseUrl}/api/lectures/${jobId}/export?format=${format}&with_answers=${withAnswers}`;
     
-    // Trigger download
     const link = document.createElement('a');
     link.href = exportUrl;
     link.download = `clipnote_export.${format === 'anki' ? 'txt' : format}`;
@@ -33,95 +32,96 @@ export const ExportModal: React.FC<ExportModalProps> = ({ jobId, isOpen, onClose
     }, 1000);
   };
 
+  const formats = [
+    {
+      key: 'pdf' as const,
+      title: 'PDF Document',
+      desc: 'Formatted summary, notes & concept tables',
+      icon: FileText,
+      accentColor: 'var(--accent-olive)',
+      accentBg: 'rgba(123, 140, 62, 0.1)',
+    },
+    {
+      key: 'md' as const,
+      title: 'Markdown Document (.md)',
+      desc: 'Clean text format for Obsidian / Notion',
+      icon: FileCode,
+      accentColor: 'var(--accent-brown)',
+      accentBg: 'rgba(139, 111, 71, 0.1)',
+    },
+    {
+      key: 'anki' as const,
+      title: 'Anki Flashcards (.txt)',
+      desc: 'Importable flashcard deck for spaced repetition',
+      icon: Layers,
+      accentColor: 'var(--accent-terracotta)',
+      accentBg: 'rgba(193, 127, 89, 0.1)',
+    },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="glass-panel w-full max-w-md rounded-2xl border border-slate-700/80 p-6 space-y-6 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+      <div className="warm-card w-full max-w-md p-6 space-y-6 relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-lg transition-colors"
+          style={{ color: 'var(--text-muted)' }}
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-1">
-          <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-            <Download className="w-5 h-5 text-cyan-400" />
+          <h3 className="font-display text-xl flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <Download className="w-5 h-5" style={{ color: 'var(--accent-olive)' }} />
             Export Study Material
           </h3>
-          <p className="text-xs text-slate-400">
-            Choose your preferred document or flashcard export format.
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Choose your preferred export format.
           </p>
         </div>
 
-        {/* Options */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
-          <span className="text-slate-300 font-medium">Include Quiz Answer Keys</span>
+        {/* Toggle */}
+        <div className="flex items-center justify-between p-3.5 rounded-xl text-xs" style={{ background: 'var(--bg-card-alt)', border: '1px solid var(--border-warm)' }}>
+          <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>Include Quiz Answer Keys</span>
           <button
             onClick={() => setWithAnswers(!withAnswers)}
-            className={`w-10 h-5 rounded-full transition-colors relative flex items-center px-0.5 ${
-              withAnswers ? 'bg-cyan-500' : 'bg-slate-700'
-            }`}
+            className="w-10 h-5 rounded-full transition-colors relative flex items-center px-0.5"
+            style={{ background: withAnswers ? 'var(--accent-olive)' : 'var(--border-strong)' }}
           >
             <div
-              className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                withAnswers ? 'translate-x-5' : 'translate-x-0'
-              }`}
+              className="w-4 h-4 rounded-full bg-white transition-transform shadow-sm"
+              style={{ transform: withAnswers ? 'translateX(20px)' : 'translateX(0)' }}
             />
           </button>
         </div>
 
         {/* Export Buttons */}
         <div className="space-y-3">
-          <button
-            onClick={() => handleExport('pdf')}
-            disabled={downloadingFormat === 'pdf'}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/60 hover:border-cyan-500/50 text-slate-100 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 group-hover:scale-105 transition-transform">
-                <FileText className="w-5 h-5" />
+          {formats.map((fmt) => (
+            <button
+              key={fmt.key}
+              onClick={() => handleExport(fmt.key)}
+              disabled={downloadingFormat === fmt.key}
+              className="w-full flex items-center justify-between p-4 rounded-xl transition-all group"
+              style={{ background: 'var(--bg-card)', border: '1.5px solid var(--border-warm)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = fmt.accentColor)}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-warm)')}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg transition-transform group-hover:scale-105" style={{ background: fmt.accentBg, color: fmt.accentColor }}>
+                  <fmt.icon className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{fmt.title}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{fmt.desc}</p>
+                </div>
               </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold">PDF Document</p>
-                <p className="text-xs text-slate-400">Formatted summary, notes & concept tables</p>
-              </div>
-            </div>
-            {downloadingFormat === 'pdf' ? <Check className="w-4 h-4 text-cyan-400 animate-bounce" /> : <Download className="w-4 h-4 text-slate-400 group-hover:text-cyan-400" />}
-          </button>
-
-          <button
-            onClick={() => handleExport('md')}
-            disabled={downloadingFormat === 'md'}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/60 hover:border-indigo-500/50 text-slate-100 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover:scale-105 transition-transform">
-                <FileCode className="w-5 h-5" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold">Markdown Document (.md)</p>
-                <p className="text-xs text-slate-400">Clean text format for Obsidian / Notion</p>
-              </div>
-            </div>
-            {downloadingFormat === 'md' ? <Check className="w-4 h-4 text-indigo-400 animate-bounce" /> : <Download className="w-4 h-4 text-slate-400 group-hover:text-indigo-400" />}
-          </button>
-
-          <button
-            onClick={() => handleExport('anki')}
-            disabled={downloadingFormat === 'anki'}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/60 hover:border-purple-500/50 text-slate-100 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 group-hover:scale-105 transition-transform">
-                <Layers className="w-5 h-5" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold">Anki Flashcards Package (.txt)</p>
-                <p className="text-xs text-slate-400">Importable flashcard deck for spatial repetition</p>
-              </div>
-            </div>
-            {downloadingFormat === 'anki' ? <Check className="w-4 h-4 text-purple-400 animate-bounce" /> : <Download className="w-4 h-4 text-slate-400 group-hover:text-purple-400" />}
-          </button>
+              {downloadingFormat === fmt.key 
+                ? <Check className="w-4 h-4 animate-bounce" style={{ color: fmt.accentColor }} /> 
+                : <Download className="w-4 h-4 group-hover:scale-110 transition-transform" style={{ color: 'var(--text-muted)' }} />
+              }
+            </button>
+          ))}
         </div>
       </div>
     </div>
